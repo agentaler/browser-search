@@ -4,6 +4,16 @@
   <img src="../img/logoLarge-browser-search.png" alt="browser-search logo" width="80%">
 </p>
 
+<p align="center">
+  <a href="https://github.com/Johell1NS/browser-search/releases"><img src="https://img.shields.io/github/v/release/Johell1NS/browser-search" alt="Release"></a>
+  <a href="https://github.com/Johell1NS/browser-search"><img src="https://img.shields.io/github/stars/Johell1NS/browser-search" alt="GitHub stars"></a>
+  <a href="https://github.com/Johell1NS/browser-search/issues"><img src="https://img.shields.io/github/issues/Johell1NS/browser-search" alt="GitHub issues"></a>
+  <a href="../LICENSE"><img src="https://img.shields.io/github/license/Johell1NS/browser-search" alt="License: MIT"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen" alt="Node.js >=20"></a>
+  <a href="https://github.com/Johell1NS/browser-search/discussions"><img src="https://img.shields.io/badge/Discussions-GitHub-333333?logo=github&logoColor=white" alt="Discussions"></a>
+  <a href="https://x.com/Johell1NS"><img src="https://img.shields.io/badge/-Follow%20updates-333333?logo=x" alt="Follow updates"></a>
+</p>
+
 > **AI एजेंटों के लिए एक स्किल।** OpenCode, Claude Code, Cursor, OpenClaw और अन्य। SearXNG के साथ वेब पर खोजें, Camofox के साथ ब्राउज़ करें, CloakBrowser के साथ सुरक्षा को बायपास करें। **डिज़ाइन द्वारा एंटी-हैलुसिनेशन।** पूरी तरह से self-hosted, मुफ़्त, असीमित।
 
 ## यह क्यों मौजूद है
