@@ -284,6 +284,11 @@ async function tryCamofoxRenderedText(url, opts) {
   return tryCamofoxTabEvaluate(url, 'document.body.innerText', opts);
 }
 
+function isCloakNotInstalled(res) {
+  const hay = [res.parseError || '', res.stderr || '', res.data?.error || '', res.motivo || ''].join(' ').toLowerCase();
+  return hay.includes('cannot find package') && hay.includes('cloakbrowser') || hay.includes('err_module_not_found') && hay.includes('cloakbrowser');
+}
+
 async function tryCloak(url, opts) {
   const start = Date.now();
   log(`CloakBrowser fetch: ${url}`);
@@ -296,7 +301,11 @@ async function tryCloak(url, opts) {
   const res = await run(CLOAK, cloArgs, { _start: start, timeout: generalTimeout * 2 });
   if (!res.data || res.data.error) {
     res.fallito = true;
-    res.motivo = res.data?.error || 'nessun output JSON valido';
+    if (isCloakNotInstalled(res)) {
+      res.motivo = `cloakbrowser not installed — run 'npm install' in skill dir (${skillDir}) then 'node -e "import(\\'cloakbrowser\\').then(c=>c.ensureBinary())"' and verify with 'bash scripts/check.sh'`;
+    } else {
+      res.motivo = res.data?.error || res.parseError || res.stderr?.slice(0, 500) || 'nessun output JSON valido';
+    }
     return res;
   }
   if (res.data && res.data.content) {

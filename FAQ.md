@@ -80,6 +80,25 @@ all three working together — skipping one compromises coverage.
 </details>
 
 <details>
+<summary>Troubleshooting: `ERR_MODULE_NOT_FOUND: Cannot find package 'cloakbrowser'`</summary>
+
+**Cause:** `npx skills add` copies files but does **not** run `npm install`. Without `cloakbrowser` installed, `smart-extract` → CloakBrowser (`--fallback` / `full-auto` escalation) and `cloak-fetch.mjs` / `cloak-script.mjs` fail at import time.
+
+**Fix (OpenCode example):**
+```bash
+cd ~/.config/opencode/skills/browser-search
+# or project-local: .agents/skills/browser-search
+npm install
+node -e "import('cloakbrowser').then(c=>c.ensureBinary())"
+bash scripts/check.sh   # should show: cloakbrowser npm package installed
+bash scripts/setup.sh   # alternative: does both steps + verifies Readability.js
+```
+
+**Verify:** `scripts/check.sh` reports `cloakbrowser not installed` → run `npm install`. `smart-extract.mjs` now returns a clear hint (`cloakbrowser not installed — run 'npm install' in skill dir ...`) instead of generic `nessun output JSON valido`.
+
+</details>
+
+<details>
 <summary>Why a skill instead of an MCP server?</summary>
 
 The main reason is **context efficiency**. MCP and skills handle context

@@ -4,12 +4,41 @@
 //
 // v2.1.0 — Added per-origin persistent sessions and WebRTC IP spoofing.
 
-import { launch, launchPersistentContext, CloakBrowserLicenseError } from 'cloakbrowser';
 import { detectChallenge, extractState, waitForChallenge } from './challenges.mjs';
 import { validateUrlWithDns } from './lib/url-validation.mjs';
 import { RateLimiter } from './lib/rate-limiter.mjs';
 import { acquireSession } from './lib/session.mjs';
 import { execFile } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import { readFileSync } from 'node:fs';
+
+const SKILL_DIR_CLOAK = (() => {
+  try {
+    const pkgPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'package.json');
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+    if (pkg.name === 'browser-search') return join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+  } catch {}
+  return dirname(fileURLToPath(import.meta.url));
+})();
+
+let _cloakMod = null;
+async function getCloak() {
+  if (_cloakMod) return _cloakMod;
+  try {
+    _cloakMod = await import('cloakbrowser');
+    return _cloakMod;
+  } catch (e) {
+    const msg = e?.message || String(e);
+    if (msg.includes('Cannot find package') && msg.includes('cloakbrowser') || e.code === 'ERR_MODULE_NOT_FOUND') {
+      const hint = `cloakbrowser not installed — run 'npm install' in skill dir (${SKILL_DIR_CLOAK}) then 'node -e "import(\\'cloakbrowser\\').then(c=>c.ensureBinary())"' and verify with 'bash scripts/check.sh'`;
+      // Emit structured JSON for smart-extract to parse
+      process.stderr.write(JSON.stringify({ error: hint, code: 'CLOAK_NOT_INSTALLED', details: msg }) + '\n');
+      process.exit(1);
+    }
+    throw e;
+  }
+}
 
 const VERSION = '2.1.0';
 
@@ -136,6 +165,7 @@ function truncate(text, maxChars) {
 }
 
 async function fetchPage(opts) {
+  const { launch, launchPersistentContext } = await getCloak();
   const launchOpts = {
     headless: true,
     ...(opts.humanize && { humanize: true, ...(opts.preset !== 'default' && { humanPreset: opts.preset }) }),
@@ -282,7 +312,7 @@ async function main() {
       process.stdout.write(JSON.stringify(result) + '\n');
       process.exit(0);
     } catch (err) {
-      if (err instanceof CloakBrowserLicenseError) {
+      if (err?.name === 'CloakBrowserLicenseError') {
         process.stderr.write(JSON.stringify({ error: err.message, license: true }) + '\n');
         process.exit(2);
       }

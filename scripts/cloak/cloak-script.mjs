@@ -5,13 +5,39 @@
 //
 // v1.1.0 — Added per-origin sessions, WebRTC IP spoofing.
 
-import { launch, launchPersistentContext, CloakBrowserLicenseError } from 'cloakbrowser';
 import { resolve, dirname, sep } from 'path';
 import { fileURLToPath } from 'url';
 import { realpath } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { createSandbox } from './lib/sandbox.mjs';
 import { RateLimiter } from './lib/rate-limiter.mjs';
 import { acquireSession } from './lib/session.mjs';
+
+const SKILL_DIR_CLOAK_SCRIPT = (() => {
+  try {
+    const pkgPath = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', 'package.json');
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+    if (pkg.name === 'browser-search') return resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+  } catch {}
+  return resolve(dirname(fileURLToPath(import.meta.url)));
+})();
+
+let _cloakModScript = null;
+async function getCloakScript() {
+  if (_cloakModScript) return _cloakModScript;
+  try {
+    _cloakModScript = await import('cloakbrowser');
+    return _cloakModScript;
+  } catch (e) {
+    const msg = e?.message || String(e);
+    if (msg.includes('Cannot find package') && msg.includes('cloakbrowser') || e.code === 'ERR_MODULE_NOT_FOUND') {
+      const hint = `cloakbrowser not installed — run 'npm install' in skill dir (${SKILL_DIR_CLOAK_SCRIPT}) then 'node -e "import(\\'cloakbrowser\\').then(c=>c.ensureBinary())"' and verify with 'bash scripts/check.sh'`;
+      process.stderr.write(JSON.stringify({ error: hint, code: 'CLOAK_NOT_INSTALLED', details: msg }) + '\n');
+      process.exit(1);
+    }
+    throw e;
+  }
+}
 
 const SKILL_DIR = resolve(dirname(dirname(dirname(fileURLToPath(import.meta.url)))));
 
@@ -122,6 +148,8 @@ async function main() {
     await limiter.acquire();
   }
 
+  const { launch, launchPersistentContext } = await getCloakScript();
+
   const launchOpts = {
     headless: true,
     ...(opts.humanize && { humanize: true, ...(opts.preset !== 'default' && { humanPreset: opts.preset }) }),
@@ -180,7 +208,7 @@ async function main() {
 
     process.stdout.write(JSON.stringify({ ok: true, data: result ?? null }) + '\n');
   } catch (err) {
-    if (err instanceof CloakBrowserLicenseError) {
+    if (err?.name === 'CloakBrowserLicenseError') {
       process.stderr.write(JSON.stringify({ error: err.message, license: true }) + '\n');
       process.exit(2);
     }

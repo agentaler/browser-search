@@ -198,6 +198,21 @@ Camofox处理快速路径。CloakBrowser处理边缘情况。两者结合覆盖�
 npx skills add Johell1NS/browser-search
 ```
 
+> **Required after `npx skills add`:** CloakBrowser is an npm dependency (`cloakbrowser` + `playwright-core`). The `skills` installer does **not** run `npm install` automatically. You must run it manually inside the skill directory:
+>
+> ```bash
+> # Find your skill directory (OpenCode example):
+> #   ~/.config/opencode/skills/browser-search
+> #   or .agents/skills/browser-search  (project-local)
+> cd ~/.config/opencode/skills/browser-search
+> npm install
+> node -e "import('cloakbrowser').then(c=>c.ensureBinary())"
+> # Verify:
+> bash scripts/check.sh
+> ```
+>
+> Without this, SearXNG and Camofox (Docker) work, but `smart-extract` -> CloakBrowser (`--fallback` / `full-auto`) will fail with `ERR_MODULE_NOT_FOUND: Cannot find package 'cloakbrowser'`.
+
 适用于70多种AI代理，包括OpenCode、Claude Code、Cursor、GitHub Copilot等。
 
 ### 步骤 2 — 设置基础设施
@@ -206,6 +221,7 @@ npx skills add Johell1NS/browser-search
 git clone https://github.com/Johell1NS/browser-search
 cd browser-search
 npm install
+node -e "import('cloakbrowser').then(c=>c.ensureBinary())"
 ```
 
 CloakBrowser 通过 npm 安装。SearXNG 和 Camofox 需要独立的 Docker 容器 — 在使用技能前请确保它们正在运行。
@@ -220,7 +236,7 @@ browser-search 不提供特定平台的 docker-compose 文件或安装脚本。�
 |---|---|---|
 | SearXNG | Docker, `:8080` | [docs.searxng.org](https://docs.searxng.org/admin/installation-docker.html) |
 | Camofox | Docker, `:9377` | [github.com/jo-inc/camofox-browser](https://github.com/jo-inc/camofox-browser) |
-| CloakBrowser | npm（已包含） | `scripts/cloak/cloak-fetch.mjs` |
+| CloakBrowser | npm (requires `npm install` in skill dir + `ensureBinary`) | `scripts/cloak/cloak-fetch.mjs` |
 
 **供AI代理参考——阅读以下文件：**
 

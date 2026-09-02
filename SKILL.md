@@ -14,7 +14,7 @@ Web search and browsing for AI agents. Three tools, from lightest to most powerf
 | **SearXNG** (Docker, :8080)  | Default: Multi-source search, find URLs/info  | `exec` + `node <skill_dir>/scripts/searxng/searxng.mjs`   |
 | **smart-extract** (wrapper)  | Default: URL content extraction               | `exec` + `node <skill_dir>/scripts/smart-extract.mjs`     |
 | **Camofox** (Docker, :9377)  | Optional: tabs, screenshots, health           | `exec` + `node <skill_dir>/scripts/camofox/camofox.mjs`   |
-| **CloakBrowser** (npm)       | Optional: proxy, session, stealth             | `exec` + `node <skill_dir>/scripts/cloak/cloak-fetch.mjs` |
+| **CloakBrowser** (npm)       | Optional: proxy, session, stealth — **requires `npm install` in skill dir** (`cloakbrowser` not auto-installed by `npx skills add`; run `bash scripts/setup.sh` or `npm install` + `node -e "import('cloakbrowser').then(c=>c.ensureBinary())"`) | `exec` + `node <skill_dir>/scripts/cloak/cloak-fetch.mjs` |
 
 ## Core rules
 
@@ -174,6 +174,8 @@ See `<skill_dir>/data/advanced-browsing-reference.md` for the full command refer
 
 ---
 
-## Technical reference — Docker containers
+## Technical reference — Prerequisites & Docker containers
+
+**CloakBrowser prerequisite:** after `npx skills add` you must run `npm install` inside the skill directory (`<skill_dir>`) and `node -e "import('cloakbrowser').then(c=>c.ensureBinary())"` — otherwise `cloak-fetch.mjs` and `smart-extract.mjs --fallback` / `full-auto` will fail with `ERR_MODULE_NOT_FOUND: Cannot find package 'cloakbrowser'`. Verify with `bash <skill_dir>/scripts/check.sh` (checks `cloakbrowser npm package installed`) or `bash <skill_dir>/scripts/setup.sh`.
 
 Initial setup and diagnostics for SearXNG and Camofox. See `<skill_dir>/docker/setup.md` when needed.

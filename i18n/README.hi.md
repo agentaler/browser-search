@@ -198,6 +198,21 @@ Camofox तेज़ पथ को संभालता है। CloakBrowser 
 npx skills add Johell1NS/browser-search
 ```
 
+> **Required after `npx skills add`:** CloakBrowser is an npm dependency (`cloakbrowser` + `playwright-core`). The `skills` installer does **not** run `npm install` automatically. You must run it manually inside the skill directory:
+>
+> ```bash
+> # Find your skill directory (OpenCode example):
+> #   ~/.config/opencode/skills/browser-search
+> #   or .agents/skills/browser-search  (project-local)
+> cd ~/.config/opencode/skills/browser-search
+> npm install
+> node -e "import('cloakbrowser').then(c=>c.ensureBinary())"
+> # Verify:
+> bash scripts/check.sh
+> ```
+>
+> Without this, SearXNG and Camofox (Docker) work, but `smart-extract` -> CloakBrowser (`--fallback` / `full-auto`) will fail with `ERR_MODULE_NOT_FOUND: Cannot find package 'cloakbrowser'`.
+
 यह OpenCode, Claude Code, Cursor, GitHub Copilot और अन्य सहित 70+ AI एजेंटों के साथ काम करता है।
 
 ### चरण 2 — बुनियादी ढाँचा सेटअप करें
@@ -206,6 +221,7 @@ npx skills add Johell1NS/browser-search
 git clone https://github.com/Johell1NS/browser-search
 cd browser-search
 npm install
+node -e "import('cloakbrowser').then(c=>c.ensureBinary())"
 ```
 
 CloakBrowser npm द्वारा स्थापित किया जाता है। SearXNG और Camofox को अलग-अलग Docker कंटेनर की आवश्यकता होती है — स्किल का उपयोग करने से पहले सुनिश्चित करें कि वे चल रहे हैं।
@@ -220,7 +236,7 @@ browser-search प्लेटफ़ॉर्म-विशिष्ट docker-co
 |---|---|---|
 | SearXNG | Docker, `:8080` | [docs.searxng.org](https://docs.searxng.org/admin/installation-docker.html) |
 | Camofox | Docker, `:9377` | [github.com/jo-inc/camofox-browser](https://github.com/jo-inc/camofox-browser) |
-| CloakBrowser | npm (शामिल) | `scripts/cloak/cloak-fetch.mjs` |
+| CloakBrowser | npm (requires `npm install` in skill dir + `ensureBinary`) | `scripts/cloak/cloak-fetch.mjs` |
 
 **AI एजेंट के लिए — ये फ़ाइलें पढ़ें:**
 

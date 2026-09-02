@@ -65,7 +65,7 @@ cloak_version() {
 
 cloak_binary_ok() {
     [ -d "$HOME/.cloakbrowser" ] && \
-        find "$HOME/.cloakbrowser" -type f \( -name chrome -o -name chromium \) 2>/dev/null | grep -q .
+        find "$HOME/.cloakbrowser" -type f \( -name chrome -o -name chromium -o -name chrome.exe -o -name chromium.exe \) 2>/dev/null | grep -q .
 }
 
 show_help() {
